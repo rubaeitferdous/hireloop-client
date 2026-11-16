@@ -55,6 +55,7 @@ export function Navbar() {
 
           <Button
             render={<Link href="/sign-up" />}
+            nativeButton={false}
             className="h-10 bg-brand px-5 text-[15px] text-white hover:bg-brand/90 sm:px-6"
           >
             Get Started
@@ -82,6 +83,7 @@ export function Navbar() {
                   <SheetClose
                     key={link.href}
                     render={<Link href={link.href} />}
+                    nativeButton={false}
                     className="rounded-lg px-3 py-2.5 text-base text-foreground/90 transition-colors hover:bg-muted hover:text-foreground"
                   >
                     {link.label}
@@ -90,6 +92,7 @@ export function Navbar() {
                 <span aria-hidden className="my-2 h-px bg-border" />
                 <SheetClose
                   render={<Link href="/sign-in" />}
+                  nativeButton={false}
                   className="rounded-lg px-3 py-2.5 text-base font-medium text-brand-light transition-colors hover:bg-muted/50"
                 >
                   Sign In
