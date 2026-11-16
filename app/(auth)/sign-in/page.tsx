@@ -3,6 +3,7 @@
 import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   ArrowLeft,
   Briefcase,
@@ -10,52 +11,75 @@ import {
   CheckCircle2,
   Eye,
   EyeOff,
+  Loader2,
   Lock,
   Mail,
 } from "lucide-react"
 
 import logoImage from "@/app/images/logo.png"
+import { authClient } from "@/lib/auth-client"
 
 type UserRole = "seeker" | "employer"
 
 export default function SignInPage() {
+  const router = useRouter()
   const [role, setRole] = React.useState<UserRole>("seeker")
   const [email, setEmail] = React.useState("")
   const [password, setPassword] = React.useState("")
   const [rememberMe, setRememberMe] = React.useState(false)
   const [showPassword, setShowPassword] = React.useState(false)
-  const [submittedData, setSubmittedData] = React.useState<{
-    role: UserRole
-    email: string
-    passwordLength: number
-    rememberMe: boolean
-  } | null>(null)
+  const [isLoading, setIsLoading] = React.useState(false)
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = React.useState<string | null>(null)
 
-  // Event handler that collects form data
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  // Better Auth Sign In
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    setErrorMessage(null)
+    setSuccessMessage(null)
+    setIsLoading(true)
 
-    const formData = {
-      role,
-      email,
-      password,
-      rememberMe,
+    try {
+      const { error } = await authClient.signIn.email({
+        email,
+        password,
+        rememberMe,
+        callbackURL: "/",
+      })
+
+      if (error) {
+        setErrorMessage(
+          error.message || "Invalid email or password. Please try again."
+        )
+        setIsLoading(false)
+        return
+      }
+
+      setSuccessMessage("Signed in successfully! Redirecting...")
+      setTimeout(() => {
+        router.push("/")
+      }, 1200)
+    } catch (err: unknown) {
+      console.error("[HireLoop Auth] Sign In error:", err)
+      setErrorMessage(
+        err instanceof Error ? err.message : "An unexpected error occurred during sign in."
+      )
+    } finally {
+      setIsLoading(false)
     }
-
-    console.log("[HireLoop Auth] Sign In Form Submitted:", formData)
-
-    setSubmittedData({
-      role,
-      email,
-      passwordLength: password.length,
-      rememberMe,
-    })
   }
 
   // Google OAuth handler
-  const handleGoogleSignIn = () => {
-    console.log("[HireLoop Auth] Google Sign In triggered for role:", role)
-    alert(`Google Sign-In initiated for ${role === "seeker" ? "Job Seeker" : "Employer"} account (Backend integration pending)`)
+  const handleGoogleSignIn = async () => {
+    try {
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/",
+      })
+    } catch (err) {
+      console.error("[HireLoop Auth] Google Sign In error:", err)
+      alert("Google OAuth is not configured yet. Please sign in with email.")
+    }
   }
 
   return (
@@ -209,10 +233,11 @@ export default function SignInPage() {
                 id="email"
                 type="email"
                 required
+                disabled={isLoading}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@company.com"
-                className="w-full rounded-xl border border-white/10 bg-[#101014] py-2.5 pr-4 pl-10 text-xs text-white placeholder:text-white/30 transition-all focus:border-brand focus:ring-1 focus:ring-brand focus:outline-none sm:text-sm"
+                className="w-full rounded-xl border border-white/10 bg-[#101014] py-2.5 pr-4 pl-10 text-xs text-white placeholder:text-white/30 transition-all focus:border-brand focus:ring-1 focus:ring-brand focus:outline-none disabled:opacity-50 sm:text-sm"
               />
             </div>
           </div>
@@ -228,7 +253,9 @@ export default function SignInPage() {
               </label>
               <button
                 type="button"
-                onClick={() => alert("Password reset functionality will be enabled soon.")}
+                onClick={() =>
+                  alert("Password reset functionality will be enabled soon.")
+                }
                 className="text-xs text-brand-light hover:underline"
               >
                 Forgot password?
@@ -240,10 +267,11 @@ export default function SignInPage() {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 required
+                disabled={isLoading}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full rounded-xl border border-white/10 bg-[#101014] py-2.5 pr-10 pl-10 text-xs text-white placeholder:text-white/30 transition-all focus:border-brand focus:ring-1 focus:ring-brand focus:outline-none sm:text-sm"
+                className="w-full rounded-xl border border-white/10 bg-[#101014] py-2.5 pr-10 pl-10 text-xs text-white placeholder:text-white/30 transition-all focus:border-brand focus:ring-1 focus:ring-brand focus:outline-none disabled:opacity-50 sm:text-sm"
               />
               {/* Toggle 3: Password Visibility Toggle */}
               <button
@@ -266,9 +294,10 @@ export default function SignInPage() {
             <label className="flex cursor-pointer items-center gap-2">
               <input
                 type="checkbox"
+                disabled={isLoading}
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 rounded border-white/20 bg-[#101014] text-brand accent-brand focus:ring-0 focus:ring-offset-0"
+                className="h-4 w-4 rounded border-white/20 bg-[#101014] text-brand accent-brand focus:ring-0 focus:ring-offset-0 disabled:opacity-50"
               />
               <span className="font-manrope text-xs text-white/70 select-none">
                 Remember me on this device
@@ -276,29 +305,39 @@ export default function SignInPage() {
             </label>
           </div>
 
+          {/* Error Message Alert */}
+          {errorMessage && (
+            <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300">
+              {errorMessage}
+            </div>
+          )}
+
+          {/* Success Message Banner */}
+          {successMessage && (
+            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-xs text-emerald-300">
+              <div className="flex items-center gap-2 font-semibold">
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+                <span>{successMessage}</span>
+              </div>
+            </div>
+          )}
+
           {/* Submit Button */}
           <button
             type="submit"
-            className="font-manrope mt-2 inline-flex h-11 w-full items-center justify-center rounded-xl bg-brand font-semibold text-white shadow-[0_0_24px_rgba(92,83,254,0.35)] transition-all hover:bg-brand/90 hover:shadow-[0_0_32px_rgba(92,83,254,0.5)] active:scale-[0.99]"
+            disabled={isLoading}
+            className="font-manrope mt-2 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-brand font-semibold text-white shadow-[0_0_24px_rgba(92,83,254,0.35)] transition-all hover:bg-brand/90 hover:shadow-[0_0_32px_rgba(92,83,254,0.5)] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Sign In as {role === "seeker" ? "Job Seeker" : "Employer"}
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Signing in...</span>
+              </>
+            ) : (
+              <span>Sign In as {role === "seeker" ? "Job Seeker" : "Employer"}</span>
+            )}
           </button>
         </form>
-
-        {/* Submission Feedback Banner */}
-        {submittedData && (
-          <div className="mt-5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-xs text-emerald-300">
-            <div className="flex items-center gap-2 font-semibold">
-              <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
-              <span>Form Data Collected (Ready for Auth Backend)</span>
-            </div>
-            <p className="mt-1 text-emerald-300/80">
-              Role: <strong className="text-white">{submittedData.role}</strong> | Email:{" "}
-              <strong className="text-white">{submittedData.email}</strong> | Remember:{" "}
-              <strong className="text-white">{submittedData.rememberMe ? "Yes" : "No"}</strong>
-            </p>
-          </div>
-        )}
 
         {/* Footer Link */}
         <p className="font-manrope mt-6 text-center text-xs text-white/50">

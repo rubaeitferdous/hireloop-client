@@ -122,6 +122,7 @@ Designed to match the dark atmospheric space theme and Figma design tokens:
   - Added custom `user.additionalFields` schema supporting `role: { type: "string", defaultValue: "seeker", input: true }`.
   - Configured typed client with `inferAdditionalFields<typeof auth>()`.
   - Connected `app/(auth)/sign-up/page.tsx` directly to `authClient.signUp.email`, including loading state spinner, error display alerts, success confirmation, and redirect to home.
+  - Connected `app/(auth)/sign-in/page.tsx` directly to `authClient.signIn.email`, including credential authentication against MongoDB, rememberMe persistence, error alerts, loading state spinner, and redirect to home.
 
 ---
 
