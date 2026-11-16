@@ -116,9 +116,12 @@ Designed to match the dark atmospheric space theme and Figma design tokens:
   - Password visibility toggle (`Eye` / `EyeOff`) on all password inputs.
   - "Remember me on this device" checkbox toggle on Sign In.
   - "Terms of Service and Privacy Policy" agreement toggle on Sign Up with validation.
-- **Event Handlers & Data Collection**:
-  - `handleSubmit` collects complete form data (`role`, `email`, `password`, `name`, `rememberMe`, `agreeToTerms`).
-  - Logs structured data to browser console and renders a visual confirmation banner.
+- **Better-Auth & MongoDB Integration (`lib/auth.ts`, `lib/auth-client.ts`, `app/api/auth/[...all]/route.ts`)**:
+  - Connected Better-Auth server to MongoDB via `BETTER_AUTH_DB_URI` (`mongodb+srv://...`) and `@better-auth/mongo-adapter`.
+  - Configured `hireloopdb` database with global client caching in development to prevent duplicate connection instances.
+  - Added custom `user.additionalFields` schema supporting `role: { type: "string", defaultValue: "seeker", input: true }`.
+  - Configured typed client with `inferAdditionalFields<typeof auth>()`.
+  - Connected `app/(auth)/sign-up/page.tsx` directly to `authClient.signUp.email`, including loading state spinner, error display alerts, success confirmation, and redirect to home.
 
 ---
 
