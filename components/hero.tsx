@@ -108,8 +108,26 @@ export function Hero() {
   }
 
   return (
-    <section className="relative overflow-hidden pt-10 pb-20 sm:pt-16 sm:pb-28 lg:pt-20 lg:pb-36">
-      {/* Upper Hero Content */}
+    <section className="relative overflow-hidden pt-12 pb-24 sm:pt-20 sm:pb-32 lg:pt-24 lg:pb-36">
+      {/* 
+        Single Atmospheric Globe Background matching Figma Group 1:
+        1440px wide background spanning from the top down through the entire hero and stats.
+      */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 flex justify-center overflow-hidden"
+      >
+        <div className="relative w-full max-w-[1440px] shrink-0">
+          <Image
+            src={globeImage}
+            alt=""
+            priority
+            quality={100}
+            className="w-full h-auto select-none"
+          />
+        </div>
+      </div>
+
       <div className="relative mx-auto flex w-full max-w-[1320px] flex-col items-center px-4 sm:px-6 lg:px-8">
         {/* Top Announcement Badge */}
         <div className="flex items-center gap-3 sm:gap-4">
@@ -117,7 +135,7 @@ export function Hero() {
             aria-hidden="true"
             className="hidden h-px w-10 bg-gradient-to-r from-transparent to-white/30 sm:block sm:w-16"
           />
-          <div className="inline-flex items-center gap-2.5 rounded-full border border-white/20 bg-card/60 px-4 py-2 shadow-[0_0_24px_rgba(154,54,168,0.25)] backdrop-blur-md sm:px-6 sm:py-2.5">
+          <div className="inline-flex items-center gap-2.5 rounded-full border border-white/20 bg-[#121216]/80 px-4 py-2 shadow-[0_0_24px_rgba(154,54,168,0.25)] backdrop-blur-md sm:px-6 sm:py-2.5">
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500 to-rose-500 text-white shadow-sm">
               <Flame className="h-3.5 w-3.5 fill-current" />
             </span>
@@ -213,36 +231,18 @@ export function Hero() {
             ))}
           </div>
         </div>
-      </div>
 
-      {/* Atmospheric Curved Globe with Foreground Stats Section */}
-      <div className="relative mt-14 sm:mt-24 lg:mt-32">
-        {/* Globe Image Layer */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 -top-24 sm:-top-44 lg:-top-64 -z-10 flex justify-center overflow-hidden"
-        >
-          <div className="relative h-[900px] w-full max-w-[1440px] shrink-0 sm:h-[1200px] lg:h-[1480px]">
-            <Image
-              src={globeImage}
-              alt=""
-              priority
-              quality={95}
-              className="h-full w-full object-cover object-top opacity-95 mix-blend-screen select-none"
-            />
-            {/* Smooth gradient blend into bottom content */}
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/90" />
-          </div>
-        </div>
-
-        {/* Centered Globe Content */}
-        <div className="relative mx-auto flex w-full max-w-[1320px] flex-col items-center px-4 sm:px-6 lg:px-8">
-          {/* Assisting Heading across the Globe */}
+        {/* 
+          Lower Section: Assisting Heading + 4 Stat Cards
+          Spacing positioned so the text rests directly on the illuminated sphere of the Earth globe
+        */}
+        <div className="mt-40 flex w-full flex-col items-center sm:mt-64 lg:mt-72">
+          {/* Heading across the Globe */}
           <h2 className="font-manrope max-w-[620px] text-center text-2xl font-medium tracking-tight text-white/90 sm:text-3xl lg:text-[40px] lg:leading-[1.25]">
             Assisting over 15,000 job seekers find their dream positions.
           </h2>
 
-          {/* 4 Stat Cards Row */}
+          {/* 4 Stat Cards */}
           <div className="mt-12 grid w-full grid-cols-1 gap-4 sm:mt-16 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
             {statsData.map((stat) => (
               <div
