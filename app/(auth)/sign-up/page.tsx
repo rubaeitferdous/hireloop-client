@@ -14,13 +14,14 @@ import {
   Loader2,
   Lock,
   Mail,
+  ShieldCheck,
   User,
 } from "lucide-react"
 
 import logoImage from "@/app/images/logo.png"
 import { authClient } from "@/lib/auth-client"
 
-type UserRole = "seeker" | "employer"
+type UserRole = "seeker" | "recruiter" | "admin"
 
 export default function SignUpPage() {
   const router = useRouter()
@@ -103,6 +104,50 @@ export default function SignUpPage() {
     }
   }
 
+  const getRoleButtonLabel = () => {
+    switch (role) {
+      case "recruiter":
+        return "Recruiter"
+      case "admin":
+        return "Admin"
+      default:
+        return "Job Seeker"
+    }
+  }
+
+  const getNameLabel = () => {
+    switch (role) {
+      case "recruiter":
+        return "Company / Recruiter name"
+      case "admin":
+        return "Admin full name"
+      default:
+        return "Full name"
+    }
+  }
+
+  const getNamePlaceholder = () => {
+    switch (role) {
+      case "recruiter":
+        return "Acme Corp / TechFlow"
+      case "admin":
+        return "System Administrator"
+      default:
+        return "Alex Morgan"
+    }
+  }
+
+  const getEmailLabel = () => {
+    switch (role) {
+      case "recruiter":
+        return "Work email address"
+      case "admin":
+        return "Admin email address"
+      default:
+        return "Email address"
+    }
+  }
+
   return (
     <div className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-[#010103] px-4 py-12 sm:px-6 lg:px-8">
       {/* Atmospheric Background Glow (matching Figma aesthetic) */}
@@ -120,7 +165,7 @@ export default function SignUpPage() {
       </div>
 
       {/* Top Navigation Bar with Logo */}
-      <div className="mx-auto mb-8 flex w-full max-w-[480px] items-center justify-between">
+      <div className="mx-auto mb-8 flex w-full max-w-[500px] items-center justify-between">
         <Link
           href="/"
           className="group flex items-center gap-2 text-xs font-medium text-white/60 transition-colors hover:text-white sm:text-sm"
@@ -140,7 +185,7 @@ export default function SignUpPage() {
       </div>
 
       {/* Sign Up Card */}
-      <div className="mx-auto w-full max-w-[480px] rounded-2xl border border-white/10 bg-gradient-to-b from-[#111115]/95 via-[#0b0b0e]/95 to-[#050507]/98 p-6 shadow-[0_20px_50px_rgba(0,0,0,0.7)] backdrop-blur-xl sm:p-8">
+      <div className="mx-auto w-full max-w-[500px] rounded-2xl border border-white/10 bg-gradient-to-b from-[#111115]/95 via-[#0b0b0e]/95 to-[#050507]/98 p-6 shadow-[0_20px_50px_rgba(0,0,0,0.7)] backdrop-blur-xl sm:p-8">
         {/* Toggle 1: Page Mode Toggle (Sign In / Sign Up) */}
         <div className="mb-6 flex rounded-xl border border-white/10 bg-[#101014] p-1">
           <Link
@@ -163,21 +208,21 @@ export default function SignUpPage() {
             Create your account
           </h1>
           <p className="font-manrope mt-1.5 text-xs text-white/60 sm:text-sm">
-            Join HireLoop to discover dream jobs and top industry talent.
+            Join HireLoop to discover dream jobs, hire top industry talent, or manage the platform.
           </p>
         </div>
 
-        {/* Toggle 2: Role Selection Toggle (Job Seeker vs Employer) */}
+        {/* Toggle 2: Role Selection Toggle (Seeker vs Recruiter vs Admin) */}
         <div className="mb-6">
           <label className="font-manrope mb-2 block text-xs font-medium text-white/70">
             I want to join HireLoop as:
           </label>
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-3 gap-2">
             <button
               type="button"
               onClick={() => setRole("seeker")}
               aria-pressed={role === "seeker"}
-              className={`flex items-center justify-center gap-2 rounded-xl border p-3 text-xs font-medium transition-all sm:text-sm ${
+              className={`flex flex-col items-center justify-center gap-1.5 rounded-xl border p-2.5 text-xs font-medium transition-all sm:p-3 sm:text-sm ${
                 role === "seeker"
                   ? "border-brand bg-brand/15 text-white shadow-[0_0_16px_rgba(92,83,254,0.3)] ring-1 ring-brand"
                   : "border-white/10 bg-[#121216] text-white/60 hover:border-white/20 hover:text-white"
@@ -189,16 +234,30 @@ export default function SignUpPage() {
 
             <button
               type="button"
-              onClick={() => setRole("employer")}
-              aria-pressed={role === "employer"}
-              className={`flex items-center justify-center gap-2 rounded-xl border p-3 text-xs font-medium transition-all sm:text-sm ${
-                role === "employer"
+              onClick={() => setRole("recruiter")}
+              aria-pressed={role === "recruiter"}
+              className={`flex flex-col items-center justify-center gap-1.5 rounded-xl border p-2.5 text-xs font-medium transition-all sm:p-3 sm:text-sm ${
+                role === "recruiter"
                   ? "border-brand bg-brand/15 text-white shadow-[0_0_16px_rgba(92,83,254,0.3)] ring-1 ring-brand"
                   : "border-white/10 bg-[#121216] text-white/60 hover:border-white/20 hover:text-white"
               }`}
             >
               <Building2 className="h-4 w-4" />
-              <span>Employer</span>
+              <span>Recruiter</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setRole("admin")}
+              aria-pressed={role === "admin"}
+              className={`flex flex-col items-center justify-center gap-1.5 rounded-xl border p-2.5 text-xs font-medium transition-all sm:p-3 sm:text-sm ${
+                role === "admin"
+                  ? "border-brand bg-brand/15 text-white shadow-[0_0_16px_rgba(92,83,254,0.3)] ring-1 ring-brand"
+                  : "border-white/10 bg-[#121216] text-white/60 hover:border-white/20 hover:text-white"
+              }`}
+            >
+              <ShieldCheck className="h-4 w-4" />
+              <span>Admin</span>
             </button>
           </div>
         </div>
@@ -240,19 +299,23 @@ export default function SignUpPage() {
 
         {/* Credentials Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Name Field (Personal or Company) */}
+          {/* Name Field */}
           <div>
             <label
               htmlFor="name"
               className="font-manrope mb-1.5 block text-xs font-medium text-white/80"
             >
-              {role === "seeker" ? "Full name" : "Company / Organization name"}
+              {getNameLabel()}
             </label>
             <div className="relative">
-              {role === "seeker" ? (
+              {role === "seeker" && (
                 <User className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
-              ) : (
+              )}
+              {role === "recruiter" && (
                 <Building2 className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+              )}
+              {role === "admin" && (
+                <ShieldCheck className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
               )}
               <input
                 id="name"
@@ -261,7 +324,7 @@ export default function SignUpPage() {
                 disabled={isLoading}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder={role === "seeker" ? "Alex Morgan" : "Acme Technologies"}
+                placeholder={getNamePlaceholder()}
                 className="w-full rounded-xl border border-white/10 bg-[#101014] py-2.5 pr-4 pl-10 text-xs text-white placeholder:text-white/30 transition-all focus:border-brand focus:ring-1 focus:ring-brand focus:outline-none disabled:opacity-50 sm:text-sm"
               />
             </div>
@@ -273,7 +336,7 @@ export default function SignUpPage() {
               htmlFor="email"
               className="font-manrope mb-1.5 block text-xs font-medium text-white/80"
             >
-              {role === "seeker" ? "Email address" : "Work email address"}
+              {getEmailLabel()}
             </label>
             <div className="relative">
               <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
@@ -284,7 +347,7 @@ export default function SignUpPage() {
                 disabled={isLoading}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder={role === "seeker" ? "name@example.com" : "recruiter@company.com"}
+                placeholder="name@example.com"
                 className="w-full rounded-xl border border-white/10 bg-[#101014] py-2.5 pr-4 pl-10 text-xs text-white placeholder:text-white/30 transition-all focus:border-brand focus:ring-1 focus:ring-brand focus:outline-none disabled:opacity-50 sm:text-sm"
               />
             </div>
@@ -418,7 +481,7 @@ export default function SignUpPage() {
                 <span>Creating Account...</span>
               </>
             ) : (
-              <span>Create {role === "seeker" ? "Job Seeker" : "Employer"} Account</span>
+              <span>Create {getRoleButtonLabel()} Account</span>
             )}
           </button>
         </form>

@@ -14,15 +14,17 @@ import {
   Loader2,
   Lock,
   Mail,
+  ShieldCheck,
 } from "lucide-react"
 
 import logoImage from "@/app/images/logo.png"
 import { authClient } from "@/lib/auth-client"
 
-type UserRole = "seeker" | "employer"
+type UserRole = "seeker" | "recruiter" | "admin"
 
 export default function SignInPage() {
   const router = useRouter()
+  const { data: session, isPending: isSessionPending } = authClient.useSession()
   const [role, setRole] = React.useState<UserRole>("seeker")
   const [email, setEmail] = React.useState("")
   const [password, setPassword] = React.useState("")
@@ -31,6 +33,13 @@ export default function SignInPage() {
   const [isLoading, setIsLoading] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
   const [successMessage, setSuccessMessage] = React.useState<string | null>(null)
+
+  // Redirect if already signed in
+  React.useEffect(() => {
+    if (!isSessionPending && session?.user) {
+      router.push("/")
+    }
+  }, [session, isSessionPending, router])
 
   // Better Auth Sign In
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -58,7 +67,7 @@ export default function SignInPage() {
       setSuccessMessage("Signed in successfully! Redirecting...")
       setTimeout(() => {
         router.push("/")
-      }, 1200)
+      }, 1000)
     } catch (err: unknown) {
       console.error("[HireLoop Auth] Sign In error:", err)
       setErrorMessage(
@@ -82,6 +91,17 @@ export default function SignInPage() {
     }
   }
 
+  const getRoleButtonLabel = () => {
+    switch (role) {
+      case "recruiter":
+        return "Recruiter"
+      case "admin":
+        return "Admin"
+      default:
+        return "Job Seeker"
+    }
+  }
+
   return (
     <div className="relative flex min-h-screen flex-col justify-center overflow-hidden bg-[#010103] px-4 py-12 sm:px-6 lg:px-8">
       {/* Atmospheric Background Glow (matching Figma aesthetic) */}
@@ -99,7 +119,7 @@ export default function SignInPage() {
       </div>
 
       {/* Top Navigation Bar with Logo */}
-      <div className="mx-auto mb-8 flex w-full max-w-[480px] items-center justify-between">
+      <div className="mx-auto mb-8 flex w-full max-w-[500px] items-center justify-between">
         <Link
           href="/"
           className="group flex items-center gap-2 text-xs font-medium text-white/60 transition-colors hover:text-white sm:text-sm"
@@ -119,7 +139,7 @@ export default function SignInPage() {
       </div>
 
       {/* Sign In Card */}
-      <div className="mx-auto w-full max-w-[480px] rounded-2xl border border-white/10 bg-gradient-to-b from-[#111115]/95 via-[#0b0b0e]/95 to-[#050507]/98 p-6 shadow-[0_20px_50px_rgba(0,0,0,0.7)] backdrop-blur-xl sm:p-8">
+      <div className="mx-auto w-full max-w-[500px] rounded-2xl border border-white/10 bg-gradient-to-b from-[#111115]/95 via-[#0b0b0e]/95 to-[#050507]/98 p-6 shadow-[0_20px_50px_rgba(0,0,0,0.7)] backdrop-blur-xl sm:p-8">
         {/* Toggle 1: Page Mode Toggle (Sign In / Sign Up) */}
         <div className="mb-6 flex rounded-xl border border-white/10 bg-[#101014] p-1">
           <button
@@ -146,17 +166,17 @@ export default function SignInPage() {
           </p>
         </div>
 
-        {/* Toggle 2: Role Selection Toggle (Job Seeker vs Employer) */}
+        {/* Toggle 2: Role Selection Toggle (Seeker vs Recruiter vs Admin) */}
         <div className="mb-6">
           <label className="font-manrope mb-2 block text-xs font-medium text-white/70">
-            Select Account Role
+            Sign in as:
           </label>
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-3 gap-2">
             <button
               type="button"
               onClick={() => setRole("seeker")}
               aria-pressed={role === "seeker"}
-              className={`flex items-center justify-center gap-2 rounded-xl border p-3 text-xs font-medium transition-all sm:text-sm ${
+              className={`flex flex-col items-center justify-center gap-1.5 rounded-xl border p-2.5 text-xs font-medium transition-all sm:p-3 sm:text-sm ${
                 role === "seeker"
                   ? "border-brand bg-brand/15 text-white shadow-[0_0_16px_rgba(92,83,254,0.3)] ring-1 ring-brand"
                   : "border-white/10 bg-[#121216] text-white/60 hover:border-white/20 hover:text-white"
@@ -168,16 +188,30 @@ export default function SignInPage() {
 
             <button
               type="button"
-              onClick={() => setRole("employer")}
-              aria-pressed={role === "employer"}
-              className={`flex items-center justify-center gap-2 rounded-xl border p-3 text-xs font-medium transition-all sm:text-sm ${
-                role === "employer"
+              onClick={() => setRole("recruiter")}
+              aria-pressed={role === "recruiter"}
+              className={`flex flex-col items-center justify-center gap-1.5 rounded-xl border p-2.5 text-xs font-medium transition-all sm:p-3 sm:text-sm ${
+                role === "recruiter"
                   ? "border-brand bg-brand/15 text-white shadow-[0_0_16px_rgba(92,83,254,0.3)] ring-1 ring-brand"
                   : "border-white/10 bg-[#121216] text-white/60 hover:border-white/20 hover:text-white"
               }`}
             >
               <Building2 className="h-4 w-4" />
-              <span>Employer</span>
+              <span>Recruiter</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setRole("admin")}
+              aria-pressed={role === "admin"}
+              className={`flex flex-col items-center justify-center gap-1.5 rounded-xl border p-2.5 text-xs font-medium transition-all sm:p-3 sm:text-sm ${
+                role === "admin"
+                  ? "border-brand bg-brand/15 text-white shadow-[0_0_16px_rgba(92,83,254,0.3)] ring-1 ring-brand"
+                  : "border-white/10 bg-[#121216] text-white/60 hover:border-white/20 hover:text-white"
+              }`}
+            >
+              <ShieldCheck className="h-4 w-4" />
+              <span>Admin</span>
             </button>
           </div>
         </div>
@@ -334,7 +368,7 @@ export default function SignInPage() {
                 <span>Signing in...</span>
               </>
             ) : (
-              <span>Sign In as {role === "seeker" ? "Job Seeker" : "Employer"}</span>
+              <span>Sign In as {getRoleButtonLabel()}</span>
             )}
           </button>
         </form>

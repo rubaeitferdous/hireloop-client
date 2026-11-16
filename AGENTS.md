@@ -68,8 +68,13 @@ Extracted directly from `public/design/hireloop.fig` (Figma artboards: `Job Hunt
 ### 3.1 Navbar (`components/navbar.tsx`)
 - Container: `max-w-[1320px]`, floating card styling with `rounded-2xl bg-card`, responsive padding.
 - Navigation items: Browse Jobs (`/jobs`), Company (`/company`), Pricing (`/pricing`).
-- Action triggers: "Sign In" link (`text-brand-light`), "Get Started" CTA button (`bg-brand`).
-- Mobile sheet drawer (`components/ui/sheet.tsx`) for viewports `< 768px`.
+- Authenticated Session State:
+  - Integrated with Better-Auth `useSession()` and `signOut()`.
+  - When signed in, renders user profile card with user name, initial avatar circle, styled role badge pill (e.g. `SEEKER`, `RECRUITER`, `ADMIN`), and an interactive Sign Out button with `LogOut` icon.
+  - Matches Figma `Seeker / Dashboard` and `Recruiter / Dashboard` top bar profile widget specification.
+  - Fully responsive: mobile sheet drawer (`components/ui/sheet.tsx`) surfaces dedicated user profile header and mobile Sign Out button.
+- Unauthenticated State:
+  - Action triggers: "Sign In" link (`text-brand-light`), "Get Started" CTA button (`bg-brand`).
 
 ### 3.2 Hero Section (`components/hero.tsx`)
 Pixel-accurate realization of Figma node `Frame 2147234456` and `Group 1`:
@@ -105,24 +110,25 @@ Designed to match the dark atmospheric space theme and Figma design tokens:
   - Centered navigation header with `HireLoop` logo (`app/images/logo.png`) and "Back to Home" link.
 - **Dual Form Mode Toggle Tab**:
   - Top segmented tab toggle (`[ Sign In ]` / `[ Create Account ]`) allowing swift navigation between auth flows.
-- **Role Selection Toggle (`Job Seeker` vs `Employer`)**:
-  - Interactive dual toggle with icons (`Briefcase` for Job Seeker, `Building2` for Employer).
+- **Role Selection Toggle (`Job Seeker`, `Recruiter`, `Admin`)**:
+  - Interactive 3-way segmented role toggle with icons (`Briefcase` for Job Seeker, `Building2` for Recruiter, `ShieldCheck` for Admin).
   - Controls account type and adapts form labels, placeholders, and action buttons dynamically.
 - **OAuth & Divider**:
   - Branded Google OAuth button ("Continue with Google" / "Sign up with Google") ready for Better-Auth client integration.
   - Centered "or continue with email" / "or register with email" divider.
 - **Form Controls & Interactive Toggles**:
-  - Email, name, password, and confirm password fields with Lucide icons (`Mail`, `Lock`, `User`, `Building2`).
+  - Email, name, password, and confirm password fields with Lucide icons (`Mail`, `Lock`, `User`, `Building2`, `ShieldCheck`).
   - Password visibility toggle (`Eye` / `EyeOff`) on all password inputs.
   - "Remember me on this device" checkbox toggle on Sign In.
   - "Terms of Service and Privacy Policy" agreement toggle on Sign Up with validation.
 - **Better-Auth & MongoDB Integration (`lib/auth.ts`, `lib/auth-client.ts`, `app/api/auth/[...all]/route.ts`)**:
   - Connected Better-Auth server to MongoDB via `BETTER_AUTH_DB_URI` (`mongodb+srv://...`) and `@better-auth/mongo-adapter`.
   - Configured `hireloopdb` database with global client caching in development to prevent duplicate connection instances.
-  - Added custom `user.additionalFields` schema supporting `role: { type: "string", defaultValue: "seeker", input: true }`.
+  - Added custom `user.additionalFields` schema supporting `role: { type: "string", defaultValue: "seeker", input: true }` accepting `["seeker", "recruiter", "employer", "admin"]`.
   - Configured typed client with `inferAdditionalFields<typeof auth>()`.
-  - Connected `app/(auth)/sign-up/page.tsx` directly to `authClient.signUp.email`, including loading state spinner, error display alerts, success confirmation, and redirect to home.
+  - Connected `app/(auth)/sign-up/page.tsx` directly to `authClient.signUp.email`, passing selected `role` (`seeker`, `recruiter`, or `admin`), loading state spinner, error display alerts, success confirmation, and redirect to home.
   - Connected `app/(auth)/sign-in/page.tsx` directly to `authClient.signIn.email`, including credential authentication against MongoDB, rememberMe persistence, error alerts, loading state spinner, and redirect to home.
+  - Both auth pages check active session via `useSession()` and automatically redirect authenticated users to the home page (`/`).
 
 ---
 
