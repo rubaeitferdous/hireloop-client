@@ -88,8 +88,15 @@ Pixel-accurate realization of Figma node `Frame 2147234456` and `Group 1`:
 - **Trending Position Chips (`Frame 2147234453`)**:
   - Label: `"Trending Position"`.
   - Interactive pill chips: `"Product Designer"`, `"AI Engineering"`, `"Dev-ops Engineer"`.
-- **Atmospheric Globe Background (`Group 1`)**:
-  - Placed behind the hero text (`app/images/globe.png`), curving upwards with starry particle haze.
+- **Atmospheric Globe & Trust Stat Cards (`Group 1` & `Frame 2147234448`)**:
+  - Atmospheric curved blue globe (`app/images/globe.png`) centered in the background.
+  - Heading across the globe: `"Assisting over 15,000 job seekers find their dream positions."` (`font-manrope text-2xl sm:text-3xl lg:text-[40px] text-white/90 text-center max-w-[620px]`).
+  - 4 Stat Cards in a responsive grid (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-4`):
+    1. `50K` / `Active Jobs` with job search briefcase icon.
+    2. `12K` / `Companies` with vertical bar chart icon.
+    3. `2M` / `Job Seekers` with user search target icon.
+    4. `97%` / `Satisfication Rate` with star outline icon.
+  - Card styling: 16px corner radius (`rounded-2xl`), linear dark gradient background (`from-[#111115] via-[#0b0b0e] to-[#050507]`), 1px subtle stroke (`border-white/10`), 24px padding (`p-6 sm:p-7`), and 56px bold numbers.
 
 ---
 

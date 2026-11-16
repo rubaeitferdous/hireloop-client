@@ -12,13 +12,95 @@ const trendingPositions = [
   "Dev-ops Engineer",
 ]
 
+const statsData = [
+  {
+    number: "50K",
+    label: "Active Jobs",
+    icon: (
+      <svg
+        className="h-6 w-6 text-white/90"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M16 20H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2" />
+        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+        <circle cx="17.5" cy="16.5" r="3.5" />
+        <path d="M20 19l2.5 2.5" />
+      </svg>
+    ),
+  },
+  {
+    number: "12K",
+    label: "Companies",
+    icon: (
+      <svg
+        className="h-6 w-6 text-white/90"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <rect x="3" y="10" width="5" height="11" rx="1" />
+        <rect x="9.5" y="4" width="5" height="17" rx="1" />
+        <rect x="16" y="13" width="5" height="8" rx="1" />
+      </svg>
+    ),
+  },
+  {
+    number: "2M",
+    label: "Job Seekers",
+    icon: (
+      <svg
+        className="h-6 w-6 text-white/90"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <circle cx="12" cy="12" r="9.5" />
+        <circle cx="12" cy="9.5" r="2.5" />
+        <path d="M7.5 16.5c0-2.2 2-3.5 4.5-3.5s4.5 1.3 4.5 3.5" />
+        <path d="M16 16l3 3" />
+      </svg>
+    ),
+  },
+  {
+    number: "97%",
+    label: "Satisfication Rate",
+    icon: (
+      <svg
+        className="h-6 w-6 text-white/90"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+      </svg>
+    ),
+  },
+]
+
 export function Hero() {
   const [jobQuery, setJobQuery] = React.useState("")
   const [locationQuery, setLocationQuery] = React.useState("")
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    // Perform search action or navigation
   }
 
   const handleTrendingClick = (position: string) => {
@@ -26,25 +108,8 @@ export function Hero() {
   }
 
   return (
-    <section className="relative overflow-hidden pt-12 pb-24 sm:pt-20 sm:pb-32 lg:pt-28 lg:pb-44">
-      {/* Atmospheric Globe Background */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 -top-20 -z-10 flex justify-center overflow-hidden lg:-top-32"
-      >
-        <div className="relative h-[850px] w-full max-w-[1440px] shrink-0 sm:h-[1050px] lg:h-[1200px]">
-          <Image
-            src={globeImage}
-            alt=""
-            priority
-            quality={95}
-            className="h-full w-full object-cover object-top opacity-90 mix-blend-screen select-none"
-          />
-          {/* Subtle radial overlay gradient for smooth integration */}
-          <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-transparent to-background" />
-        </div>
-      </div>
-
+    <section className="relative overflow-hidden pt-10 pb-20 sm:pt-16 sm:pb-28 lg:pt-20 lg:pb-36">
+      {/* Upper Hero Content */}
       <div className="relative mx-auto flex w-full max-w-[1320px] flex-col items-center px-4 sm:px-6 lg:px-8">
         {/* Top Announcement Badge */}
         <div className="flex items-center gap-3 sm:gap-4">
@@ -85,7 +150,7 @@ export function Hero() {
           role="search"
           aria-label="Job search"
         >
-          <div className="flex flex-col gap-3 rounded-2xl border border-white/20 bg-[#101010]/85 p-2.5 shadow-[0_12px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:flex-row sm:items-center sm:gap-0 sm:py-2 sm:pr-2.5 sm:pl-5">
+          <div className="flex flex-col gap-3 rounded-2xl border border-white/20 bg-[#101010]/90 p-2.5 shadow-[0_12px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:flex-row sm:items-center sm:gap-0 sm:py-2 sm:pr-2.5 sm:pl-5">
             {/* Field 1: Job title / skill */}
             <div className="flex flex-1 items-center gap-3 px-2 py-1.5 sm:px-0 sm:py-0">
               <Search className="h-5 w-5 shrink-0 text-white/50" />
@@ -145,6 +210,60 @@ export function Hero() {
               >
                 {position}
               </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Atmospheric Curved Globe with Foreground Stats Section */}
+      <div className="relative mt-14 sm:mt-24 lg:mt-32">
+        {/* Globe Image Layer */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 -top-24 sm:-top-44 lg:-top-64 -z-10 flex justify-center overflow-hidden"
+        >
+          <div className="relative h-[900px] w-full max-w-[1440px] shrink-0 sm:h-[1200px] lg:h-[1480px]">
+            <Image
+              src={globeImage}
+              alt=""
+              priority
+              quality={95}
+              className="h-full w-full object-cover object-top opacity-95 mix-blend-screen select-none"
+            />
+            {/* Smooth gradient blend into bottom content */}
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/90" />
+          </div>
+        </div>
+
+        {/* Centered Globe Content */}
+        <div className="relative mx-auto flex w-full max-w-[1320px] flex-col items-center px-4 sm:px-6 lg:px-8">
+          {/* Assisting Heading across the Globe */}
+          <h2 className="font-manrope max-w-[620px] text-center text-2xl font-medium tracking-tight text-white/90 sm:text-3xl lg:text-[40px] lg:leading-[1.25]">
+            Assisting over 15,000 job seekers find their dream positions.
+          </h2>
+
+          {/* 4 Stat Cards Row */}
+          <div className="mt-12 grid w-full grid-cols-1 gap-4 sm:mt-16 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
+            {statsData.map((stat) => (
+              <div
+                key={stat.label}
+                className="group relative flex min-h-[220px] flex-col justify-between rounded-2xl border border-white/10 bg-gradient-to-b from-[#111115]/95 via-[#0b0b0e]/95 to-[#050507]/98 p-6 shadow-2xl backdrop-blur-xl transition-all duration-300 hover:border-white/20 hover:shadow-[0_16px_40px_rgba(0,0,0,0.6)] lg:h-[254px] lg:p-7"
+              >
+                {/* Top Icon */}
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.04] text-white/90">
+                  {stat.icon}
+                </div>
+
+                {/* Bottom Numbers & Label */}
+                <div className="mt-8 flex flex-col">
+                  <span className="font-manrope text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-[56px] lg:leading-none">
+                    {stat.number}
+                  </span>
+                  <span className="font-manrope mt-2.5 text-sm font-normal text-white/70 sm:text-base lg:text-[18px]">
+                    {stat.label}
+                  </span>
+                </div>
+              </div>
             ))}
           </div>
         </div>
