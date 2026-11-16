@@ -108,27 +108,87 @@ export function Hero() {
   }
 
   return (
-    <section className="relative overflow-hidden pt-12 pb-24 sm:pt-20 sm:pb-32 lg:pt-24 lg:pb-36">
+    <section className="relative pt-12 pb-24 sm:pt-20 sm:pb-32 lg:pt-24 lg:pb-36">
+      {/* ─── Background Layers (matching Figma Group 1) ─── */}
       {/* 
-        Single Atmospheric Globe Background matching Figma Group 1:
-        1440px wide background spanning from the top down through the entire hero and stats.
+        The globe.png is 1440×1882 with:
+        - Transparent top ~50px with faint purple/magenta aura baked in at very top rows
+        - Mostly transparent from ~50px to ~750px (star field area in Figma, but transparent in the exported PNG)
+        - Globe sphere starts emerging around y=750, becomes fully opaque by y=1100
+        - Bright blue-purple horizon rim around y=1000-1050
+        - Dark sphere body from y=1050 to bottom
+        
+        The background container is absolutely positioned and stretches the full height
+        of the section. The image is placed so its bright horizon rim aligns with 
+        the "Assisting over 15,000..." text area.
       */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 flex justify-center overflow-hidden"
+        className="pointer-events-none absolute inset-0 overflow-hidden"
       >
-        <div className="relative w-full max-w-[1440px] shrink-0">
+        {/* Layer 1: Top atmospheric magenta/purple aura (Figma "Exclude" at 50% opacity) */}
+        <div
+          className="absolute left-1/2 -translate-x-1/2"
+          style={{
+            top: "-200px",
+            width: "1200px",
+            height: "600px",
+            borderRadius: "50%",
+            background:
+              "radial-gradient(ellipse at center, rgba(220, 2, 206, 0.35) 0%, rgba(92, 83, 254, 0.18) 40%, transparent 70%)",
+            filter: "blur(80px)",
+          }}
+        />
+
+        {/* Layer 2: Globe image centered, positioned so the sphere horizon aligns with content */}
+        <div
+          className="absolute left-1/2 -translate-x-1/2"
+          style={{
+            /*
+              Globe image is 1440×1882. On a 1440px-wide viewport the image is ~1882px tall.
+              The bright horizon rim is at roughly y=1000 in the image (53% from top).
+              
+              The hero upper content (badge→trending) occupies roughly 0→520px of the section.
+              The "Assisting..." heading is at roughly 520+256=776px from top of section.
+              
+              We want image-y=1000 to align with section-y≈750.
+              So image top = 750 - 1000 = -250px from top of section.
+              
+              We use top: -250px to push the image up so the sphere appears at the right spot.
+            */
+            top: "-250px",
+            width: "1440px",
+            height: "1882px",
+          }}
+        >
           <Image
             src={globeImage}
             alt=""
             priority
             quality={100}
-            className="w-full h-auto select-none"
+            fill
+            sizes="1440px"
+            className="object-contain"
           />
         </div>
+
+        {/* Layer 3: Purple glow behind globe horizon (Figma gradient ellipses) */}
+        <div
+          className="absolute left-1/2 -translate-x-1/2"
+          style={{
+            top: "380px",
+            width: "900px",
+            height: "500px",
+            borderRadius: "50%",
+            background:
+              "radial-gradient(ellipse at center, rgba(92, 83, 254, 0.5) 0%, rgba(92, 83, 254, 0.15) 45%, transparent 75%)",
+            filter: "blur(60px)",
+          }}
+        />
       </div>
 
-      <div className="relative mx-auto flex w-full max-w-[1320px] flex-col items-center px-4 sm:px-6 lg:px-8">
+      {/* ─── Content ─── */}
+      <div className="relative z-10 mx-auto flex w-full max-w-[1320px] flex-col items-center px-4 sm:px-6 lg:px-8">
         {/* Top Announcement Badge */}
         <div className="flex items-center gap-3 sm:gap-4">
           <span
@@ -234,9 +294,9 @@ export function Hero() {
 
         {/* 
           Lower Section: Assisting Heading + 4 Stat Cards
-          Spacing positioned so the text rests directly on the illuminated sphere of the Earth globe
+          Spacing tuned so the "Assisting..." text sits on the bright horizon rim of the globe.
         */}
-        <div className="mt-40 flex w-full flex-col items-center sm:mt-64 lg:mt-72">
+        <div className="mt-44 flex w-full flex-col items-center sm:mt-56 lg:mt-64">
           {/* Heading across the Globe */}
           <h2 className="font-manrope max-w-[620px] text-center text-2xl font-medium tracking-tight text-white/90 sm:text-3xl lg:text-[40px] lg:leading-[1.25]">
             Assisting over 15,000 job seekers find their dream positions.

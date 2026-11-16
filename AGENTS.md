@@ -89,7 +89,7 @@ Pixel-accurate realization of Figma node `Frame 2147234456` and `Group 1`:
   - Label: `"Trending Position"`.
   - Interactive pill chips: `"Product Designer"`, `"AI Engineering"`, `"Dev-ops Engineer"`.
 - **Atmospheric Globe & Trust Stat Cards (`Group 1` & `Frame 2147234448`)**:
-  - Atmospheric curved blue globe (`app/images/globe.png`) centered in the background.
+  - Atmospheric curved blue globe (`app/images/globe.png`) centered in the background with layer positioning aligned to the content crest.
   - Heading across the globe: `"Assisting over 15,000 job seekers find their dream positions."` (`font-manrope text-2xl sm:text-3xl lg:text-[40px] text-white/90 text-center max-w-[620px]`).
   - 4 Stat Cards in a responsive grid (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-4`):
     1. `50K` / `Active Jobs` with job search briefcase icon.
@@ -97,6 +97,28 @@ Pixel-accurate realization of Figma node `Frame 2147234456` and `Group 1`:
     3. `2M` / `Job Seekers` with user search target icon.
     4. `97%` / `Satisfication Rate` with star outline icon.
   - Card styling: 16px corner radius (`rounded-2xl`), linear dark gradient background (`from-[#111115] via-[#0b0b0e] to-[#050507]`), 1px subtle stroke (`border-white/10`), 24px padding (`p-6 sm:p-7`), and 56px bold numbers.
+
+### 3.3 Authentication Pages (`app/(auth)/sign-in/page.tsx` & `app/(auth)/sign-up/page.tsx`)
+Designed to match the dark atmospheric space theme and Figma design tokens:
+- **Atmospheric Background & Branding**:
+  - Near-black `#010103` canvas with soft radial ambient glow (purple `#5c53fe` / magenta `#dc02ce` at top).
+  - Centered navigation header with `HireLoop` logo (`app/images/logo.png`) and "Back to Home" link.
+- **Dual Form Mode Toggle Tab**:
+  - Top segmented tab toggle (`[ Sign In ]` / `[ Create Account ]`) allowing swift navigation between auth flows.
+- **Role Selection Toggle (`Job Seeker` vs `Employer`)**:
+  - Interactive dual toggle with icons (`Briefcase` for Job Seeker, `Building2` for Employer).
+  - Controls account type and adapts form labels, placeholders, and action buttons dynamically.
+- **OAuth & Divider**:
+  - Branded Google OAuth button ("Continue with Google" / "Sign up with Google") ready for Better-Auth client integration.
+  - Centered "or continue with email" / "or register with email" divider.
+- **Form Controls & Interactive Toggles**:
+  - Email, name, password, and confirm password fields with Lucide icons (`Mail`, `Lock`, `User`, `Building2`).
+  - Password visibility toggle (`Eye` / `EyeOff`) on all password inputs.
+  - "Remember me on this device" checkbox toggle on Sign In.
+  - "Terms of Service and Privacy Policy" agreement toggle on Sign Up with validation.
+- **Event Handlers & Data Collection**:
+  - `handleSubmit` collects complete form data (`role`, `email`, `password`, `name`, `rememberMe`, `agreeToTerms`).
+  - Logs structured data to browser console and renders a visual confirmation banner.
 
 ---
 
