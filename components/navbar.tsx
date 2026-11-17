@@ -28,11 +28,17 @@ const navLinks = [
 export function Navbar() {
   const router = useRouter()
   const { data: session, isPending } = useSession()
+  const [isSigningOut, setIsSigningOut] = React.useState(false)
 
   const handleSignOut = async () => {
-    await signOut()
-    router.push("/")
-    router.refresh()
+    setIsSigningOut(true)
+    try {
+      await signOut()
+      router.push("/")
+      router.refresh()
+    } finally {
+      setIsSigningOut(false)
+    }
   }
 
   // Helper to extract initials
@@ -74,7 +80,9 @@ export function Navbar() {
           />
 
           {/* Session State Navigation */}
-          {!isPending && session?.user ? (
+          {isPending ? (
+            <div className="hidden h-10 w-32 animate-pulse rounded-full bg-white/5 md:block" />
+          ) : session?.user ? (
             <div className="hidden items-center gap-3 md:flex">
               {/* Profile Avatar Pill matching Figma */}
               <div className="flex items-center gap-2.5 rounded-full border border-white/10 bg-[#141419] py-1 pr-3 pl-1.5 shadow-sm">
@@ -97,9 +105,10 @@ export function Navbar() {
               <button
                 type="button"
                 onClick={handleSignOut}
+                disabled={isSigningOut}
                 aria-label="Sign out"
                 title="Sign out"
-                className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 text-white/60 transition-colors hover:border-rose-500/30 hover:bg-rose-500/10 hover:text-rose-400"
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 text-white/60 transition-colors hover:border-rose-500/30 hover:bg-rose-500/10 hover:text-rose-400 disabled:opacity-50"
               >
                 <LogOut className="h-4 w-4" />
               </button>
@@ -145,16 +154,23 @@ export function Navbar() {
                 {/* Mobile Session Header */}
                 {!isPending && session?.user && (
                   <div className="mb-3 flex items-center gap-3 rounded-xl border border-white/10 bg-[#121216] p-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand/30 text-sm font-bold text-white ring-1 ring-brand/50">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/30 text-sm font-bold text-white ring-1 ring-brand/50">
                       {getInitials(session.user.name)}
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-semibold text-white">
+                    <div className="flex min-w-0 flex-col">
+                      <span className="truncate text-sm font-semibold text-white">
                         {session.user.name}
                       </span>
-                      <span className="text-xs text-white/50">
-                        {session.user.email}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="truncate text-xs text-white/50">
+                          {session.user.email}
+                        </span>
+                        {userRole ? (
+                          <span className="shrink-0 rounded-full bg-brand/20 px-1.5 py-0.2 text-[9px] font-medium uppercase tracking-wider text-brand-light">
+                            {String(userRole)}
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -171,14 +187,19 @@ export function Navbar() {
                 ))}
                 <span aria-hidden className="my-2 h-px bg-border" />
                 {!isPending && session?.user ? (
-                  <button
-                    type="button"
-                    onClick={handleSignOut}
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-base font-medium text-rose-400 transition-colors hover:bg-rose-500/10"
+                  <SheetClose
+                    render={
+                      <button
+                        type="button"
+                        onClick={handleSignOut}
+                        disabled={isSigningOut}
+                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-base font-medium text-rose-400 transition-colors hover:bg-rose-500/10 disabled:opacity-50"
+                      />
+                    }
                   >
                     <LogOut className="h-4 w-4" />
-                    <span>Sign Out</span>
-                  </button>
+                    <span>{isSigningOut ? "Signing Out..." : "Sign Out"}</span>
+                  </SheetClose>
                 ) : (
                   <SheetClose
                     render={<Link href="/sign-in" />}

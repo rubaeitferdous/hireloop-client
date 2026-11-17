@@ -25,6 +25,7 @@ type UserRole = "seeker" | "recruiter" | "admin"
 
 export default function SignUpPage() {
   const router = useRouter()
+  const { data: session, isPending: isSessionPending } = authClient.useSession()
   const [role, setRole] = React.useState<UserRole>("seeker")
   const [name, setName] = React.useState("")
   const [email, setEmail] = React.useState("")
@@ -36,6 +37,23 @@ export default function SignUpPage() {
   const [isLoading, setIsLoading] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
   const [successMessage, setSuccessMessage] = React.useState<string | null>(null)
+  const redirectTimerRef = React.useRef<NodeJS.Timeout | null>(null)
+
+  // Redirect if already signed in
+  React.useEffect(() => {
+    if (!isSessionPending && session?.user) {
+      router.push("/")
+    }
+  }, [session, isSessionPending, router])
+
+  // Clean up redirect timer
+  React.useEffect(() => {
+    return () => {
+      if (redirectTimerRef.current) {
+        clearTimeout(redirectTimerRef.current)
+      }
+    }
+  }, [])
 
   // Better Auth Sign Up with MongoDB
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -78,9 +96,10 @@ export default function SignUpPage() {
       }
 
       setSuccessMessage("Account created successfully! Redirecting...")
-      setTimeout(() => {
+      redirectTimerRef.current = setTimeout(() => {
         router.push("/")
-      }, 1500)
+        router.refresh()
+      }, 1200)
     } catch (err: unknown) {
       console.error("[HireLoop Auth] Sign Up error:", err)
       setErrorMessage(
@@ -93,6 +112,7 @@ export default function SignUpPage() {
 
   // Google OAuth handler
   const handleGoogleSignUp = async () => {
+    setErrorMessage(null)
     try {
       await authClient.signIn.social({
         provider: "google",
@@ -100,7 +120,7 @@ export default function SignUpPage() {
       })
     } catch (err) {
       console.error("[HireLoop Auth] Google Sign Up error:", err)
-      alert("Google OAuth is not configured yet. Please register with email.")
+      setErrorMessage("Google OAuth is not configured yet. Please register with email.")
     }
   }
 

@@ -33,6 +33,8 @@ export default function SignInPage() {
   const [isLoading, setIsLoading] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
   const [successMessage, setSuccessMessage] = React.useState<string | null>(null)
+  const [infoMessage, setInfoMessage] = React.useState<string | null>(null)
+  const redirectTimerRef = React.useRef<NodeJS.Timeout | null>(null)
 
   // Redirect if already signed in
   React.useEffect(() => {
@@ -41,11 +43,21 @@ export default function SignInPage() {
     }
   }, [session, isSessionPending, router])
 
+  // Clean up redirect timer
+  React.useEffect(() => {
+    return () => {
+      if (redirectTimerRef.current) {
+        clearTimeout(redirectTimerRef.current)
+      }
+    }
+  }, [])
+
   // Better Auth Sign In
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setErrorMessage(null)
     setSuccessMessage(null)
+    setInfoMessage(null)
     setIsLoading(true)
 
     try {
@@ -65,8 +77,9 @@ export default function SignInPage() {
       }
 
       setSuccessMessage("Signed in successfully! Redirecting...")
-      setTimeout(() => {
+      redirectTimerRef.current = setTimeout(() => {
         router.push("/")
+        router.refresh()
       }, 1000)
     } catch (err: unknown) {
       console.error("[HireLoop Auth] Sign In error:", err)
@@ -80,6 +93,8 @@ export default function SignInPage() {
 
   // Google OAuth handler
   const handleGoogleSignIn = async () => {
+    setErrorMessage(null)
+    setInfoMessage(null)
     try {
       await authClient.signIn.social({
         provider: "google",
@@ -87,7 +102,7 @@ export default function SignInPage() {
       })
     } catch (err) {
       console.error("[HireLoop Auth] Google Sign In error:", err)
-      alert("Google OAuth is not configured yet. Please sign in with email.")
+      setErrorMessage("Google OAuth is not configured yet. Please sign in with email.")
     }
   }
 
@@ -287,9 +302,10 @@ export default function SignInPage() {
               </label>
               <button
                 type="button"
-                onClick={() =>
-                  alert("Password reset functionality will be enabled soon.")
-                }
+                onClick={() => {
+                  setErrorMessage(null)
+                  setInfoMessage("Password reset functionality will be enabled soon. Please contact support if you need immediate assistance.")
+                }}
                 className="text-xs text-brand-light hover:underline"
               >
                 Forgot password?
@@ -343,6 +359,13 @@ export default function SignInPage() {
           {errorMessage && (
             <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300">
               {errorMessage}
+            </div>
+          )}
+
+          {/* Info Message Notice */}
+          {infoMessage && (
+            <div className="rounded-xl border border-brand/30 bg-brand/10 p-3 text-xs text-brand-light">
+              {infoMessage}
             </div>
           )}
 

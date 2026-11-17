@@ -124,7 +124,7 @@ Designed to match the dark atmospheric space theme and Figma design tokens:
 - **Better-Auth & MongoDB Integration (`lib/auth.ts`, `lib/auth-client.ts`, `app/api/auth/[...all]/route.ts`)**:
   - Connected Better-Auth server to MongoDB via `BETTER_AUTH_DB_URI` (`mongodb+srv://...`) and `@better-auth/mongo-adapter`.
   - Configured `hireloopdb` database with global client caching in development to prevent duplicate connection instances.
-  - Added custom `user.additionalFields` schema supporting `role: { type: "string", defaultValue: "seeker", input: true }` accepting `["seeker", "recruiter", "employer", "admin"]`.
+  - Added custom `user.additionalFields` schema supporting `role: { type: ["seeker", "recruiter", "employer", "admin"], defaultValue: "seeker", input: true, returned: true }`.
   - Configured typed client with `inferAdditionalFields<typeof auth>()`.
   - Connected `app/(auth)/sign-up/page.tsx` directly to `authClient.signUp.email`, passing selected `role` (`seeker`, `recruiter`, or `admin`), loading state spinner, error display alerts, success confirmation, and redirect to home.
   - Connected `app/(auth)/sign-in/page.tsx` directly to `authClient.signIn.email`, including credential authentication against MongoDB, rememberMe persistence, error alerts, loading state spinner, and redirect to home.

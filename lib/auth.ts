@@ -2,7 +2,7 @@ import { betterAuth } from "better-auth"
 import { MongoClient } from "mongodb"
 import { mongodbAdapter } from "@better-auth/mongo-adapter"
 
-const uri = process.env.BETTER_AUTH_DB_URI as string
+const uri = process.env.BETTER_AUTH_DB_URI || ""
 
 // Prevent multiple MongoClient instances in development
 declare global {
@@ -35,6 +35,7 @@ export const auth = betterAuth({
         required: false,
         defaultValue: "seeker",
         input: true,
+        returned: true,
       },
     },
   },

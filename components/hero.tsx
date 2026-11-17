@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { Flame, MapPin, Search } from "lucide-react"
 
 import globeImage from "@/app/images/globe.png"
@@ -96,11 +97,17 @@ const statsData = [
 ]
 
 export function Hero() {
+  const router = useRouter()
   const [jobQuery, setJobQuery] = React.useState("")
   const [locationQuery, setLocationQuery] = React.useState("")
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
+    const params = new URLSearchParams()
+    if (jobQuery.trim()) params.set("q", jobQuery.trim())
+    if (locationQuery.trim()) params.set("location", locationQuery.trim())
+    const qs = params.toString()
+    router.push(qs ? `/jobs?${qs}` : "/jobs")
   }
 
   const handleTrendingClick = (position: string) => {
