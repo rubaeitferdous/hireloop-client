@@ -1,9 +1,13 @@
 /**
  * HireLoop API Client
- * Provides typed methods for interacting with the Express 5 backend server on http://localhost:5000.
+ * Provides typed methods for interacting with the Express 5 backend server.
  */
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_SERVER_URL ||
+  (typeof window !== "undefined" && window.location.hostname !== "localhost"
+    ? ""
+    : "http://localhost:5000");
 
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
