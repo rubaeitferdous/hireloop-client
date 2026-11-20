@@ -3,6 +3,7 @@
 import * as React from "react"
 import { useSession } from "@/lib/auth-client"
 import { mockJobs, mockCompanies, Job, Company } from "@/lib/mock-data"
+import { api } from "@/lib/api"
 
 export type ApplicationStatus = "Applied" | "Under Review" | "Shortlisted" | "Rejected" | "Offered"
 export type CompanyApprovalStatus = "Pending" | "Approved" | "Rejected"
@@ -305,11 +306,59 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   )
   const [payments, setPayments] = React.useState<PaymentTransaction[]>(initialPayments)
 
+  // Hydrate from live backend on mount if available
+  React.useEffect(() => {
+    let isMounted = true
+
+    async function loadBackendData() {
+      try {
+        const [jobsRes, compsRes, appsRes, usersRes, paysRes] = await Promise.allSettled([
+          api.getJobs(),
+          api.getCompanies({ all: true }),
+          api.getApplications(),
+          api.getUsers(),
+          api.getPayments(),
+        ])
+
+        if (!isMounted) return
+
+        if (jobsRes.status === "fulfilled" && jobsRes.value.jobs?.length) {
+          setRecruiterJobs(jobsRes.value.jobs)
+        }
+        if (compsRes.status === "fulfilled" && compsRes.value.companies?.length) {
+          setCompanies(compsRes.value.companies.map((c: any) => ({
+            ...c,
+            approvalStatus: c.approvalStatus || "Approved",
+            recruiterEmail: c.recruiterEmail || `recruiter@${c.id}.com`,
+          })))
+        }
+        if (appsRes.status === "fulfilled" && appsRes.value.applications?.length) {
+          setApplications(appsRes.value.applications)
+        }
+        if (usersRes.status === "fulfilled" && usersRes.value.users?.length) {
+          setUsers(usersRes.value.users)
+        }
+        if (paysRes.status === "fulfilled" && paysRes.value.payments?.length) {
+          setPayments(paysRes.value.payments)
+        }
+      } catch (err) {
+        console.warn("Backend offline or unreachable, using local dashboard cache:", err)
+      }
+    }
+
+    loadBackendData()
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
   // Actions
   const toggleSaveJob = (jobId: string) => {
     setSavedJobIds((prev) =>
       prev.includes(jobId) ? prev.filter((id) => id !== jobId) : [...prev, jobId]
     )
+    const email = session?.user?.email || "alex.rivera@example.com"
+    api.toggleSavedJob(email, jobId).catch((err) => console.warn("Could not sync saved job:", err))
   }
 
   const submitApplication = async (
@@ -346,6 +395,16 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       ...prev,
       applicationsUsed: prev.applicationsUsed + 1,
     }))
+
+    // Sync to backend API
+    api.submitApplication({
+      jobId: targetJob.id,
+      seekerEmail: newApp.seekerEmail,
+      seekerName: newApp.seekerName,
+      coverLetter,
+      resumeUrl: newApp.resumeUrl,
+    }).catch((err) => console.warn("Backend submit application error:", err))
+
     return true
   }
 
@@ -360,10 +419,12 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       applicationsLimit: limitMap[plan],
     })
 
+    const email = session?.user?.email || "alex.rivera@example.com"
+
     if (priceMap[plan] > 0) {
       const newTx: PaymentTransaction = {
         id: `tx_${Date.now()}`,
-        userEmail: session?.user?.email || "alex.rivera@example.com",
+        userEmail: email,
         plan: `${plan} (Seeker)`,
         amount: priceMap[plan],
         currency: "USD",
@@ -372,6 +433,13 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       }
       setPayments((prev) => [newTx, ...prev])
     }
+
+    api.upgradeSubscription({
+      userEmail: email,
+      plan,
+      role: "seeker",
+      amount: priceMap[plan],
+    }).catch((err) => console.warn("Backend upgrade plan error:", err))
   }
 
   const updateSeekerProfile = (updates: Partial<typeof seekerProfile>) => {
@@ -429,27 +497,38 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     }
 
     setRecruiterJobs((prev) => [newJob, ...prev])
+    api.createJob({
+      ...newJob,
+      recruiterEmail: session?.user?.email || "recruiter@meta.com",
+    }).catch((err) => console.warn("Backend create job error:", err))
+
     return true
   }
 
   const deleteJob = (jobId: string) => {
     setRecruiterJobs((prev) => prev.filter((j) => j.id !== jobId))
+    api.deleteJob(jobId).catch((err) => console.warn("Backend delete job error:", err))
   }
 
   const toggleJobClose = (jobId: string) => {
+    const target = recruiterJobs.find((j) => j.id === jobId)
+    const nextStatus = target?.status === "Closed" ? "Active" : "Closed"
+
     setRecruiterJobs((prev) =>
       prev.map((j) =>
         j.id === jobId
-          ? { ...j, status: j.status === "Closed" ? "Active" : "Closed" }
+          ? { ...j, status: nextStatus }
           : j
       )
     )
+    api.updateJob(jobId, { status: nextStatus }).catch((err) => console.warn("Backend toggle job status error:", err))
   }
 
   const updateApplicantStatus = (applicationId: string, newStatus: ApplicationStatus) => {
     setApplications((prev) =>
       prev.map((app) => (app.id === applicationId ? { ...app, status: newStatus } : app))
     )
+    api.updateApplicationStatus(applicationId, newStatus).catch((err) => console.warn("Backend update applicant status error:", err))
   }
 
   const upgradeRecruiterPlan = (plan: "Free" | "Growth" | "Enterprise") => {
@@ -462,10 +541,12 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       activeJobsLimit: limitMap[plan],
     })
 
+    const email = session?.user?.email || "recruiter@meta.com"
+
     if (priceMap[plan] > 0) {
       const newTx: PaymentTransaction = {
         id: `tx_${Date.now()}`,
-        userEmail: session?.user?.email || "recruiter@meta.com",
+        userEmail: email,
         plan: `${plan} (Recruiter)`,
         amount: priceMap[plan],
         currency: "USD",
@@ -474,30 +555,36 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       }
       setPayments((prev) => [newTx, ...prev])
     }
+
+    api.upgradeSubscription({
+      userEmail: email,
+      plan,
+      role: "recruiter",
+      amount: priceMap[plan],
+    }).catch((err) => console.warn("Backend recruiter upgrade error:", err))
   }
 
   // Admin Actions
   const toggleUserRole = (userId: string) => {
+    const user = users.find((u) => u.id === userId)
+    if (!user) return
+    const nextRole = user.role === "seeker" ? "recruiter" : "seeker"
+
     setUsers((prev) =>
-      prev.map((u) => {
-        if (u.id === userId) {
-          const nextRole = u.role === "seeker" ? "recruiter" : "seeker"
-          return { ...u, role: nextRole }
-        }
-        return u
-      })
+      prev.map((u) => (u.id === userId ? { ...u, role: nextRole } : u))
     )
+    api.updateUserRole(userId, nextRole).catch((err) => console.warn("Backend toggle role error:", err))
   }
 
   const toggleUserStatus = (userId: string) => {
+    const user = users.find((u) => u.id === userId)
+    if (!user) return
+    const nextStatus = user.status === "Active" ? "Suspended" : "Active"
+
     setUsers((prev) =>
-      prev.map((u) => {
-        if (u.id === userId) {
-          return { ...u, status: u.status === "Active" ? "Suspended" : "Active" }
-        }
-        return u
-      })
+      prev.map((u) => (u.id === userId ? { ...u, status: nextStatus } : u))
     )
+    api.updateUserStatus(userId, nextStatus).catch((err) => console.warn("Backend toggle status error:", err))
   }
 
   const approveCompany = (companyId: string) => {
@@ -507,6 +594,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     if (myCompany?.id === companyId) {
       setMyCompany((prev) => (prev ? { ...prev, status: "Approved" } : null))
     }
+    api.setCompanyStatus(companyId, "Approved").catch((err) => console.warn("Backend approve company error:", err))
   }
 
   const rejectCompany = (companyId: string) => {
@@ -516,10 +604,12 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     if (myCompany?.id === companyId) {
       setMyCompany((prev) => (prev ? { ...prev, status: "Rejected" } : null))
     }
+    api.setCompanyStatus(companyId, "Rejected").catch((err) => console.warn("Backend reject company error:", err))
   }
 
   const deletePlatformJob = (jobId: string) => {
     setRecruiterJobs((prev) => prev.filter((j) => j.id !== jobId))
+    api.deleteJob(jobId).catch((err) => console.warn("Backend delete platform job error:", err))
   }
 
   return (
