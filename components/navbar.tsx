@@ -4,7 +4,7 @@ import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { LogOut, MenuIcon } from "lucide-react"
+import { LayoutDashboard, LogOut, MenuIcon } from "lucide-react"
 
 import logo from "@/app/images/logo.png"
 import { Button } from "@/components/ui/button"
@@ -23,6 +23,7 @@ const navLinks = [
   { label: "Browse Jobs", href: "/jobs" },
   { label: "Company", href: "/company" },
   { label: "Pricing", href: "/pricing" },
+  { label: "Dashboard", href: "/dashboard" },
 ]
 
 export function Navbar() {
@@ -84,6 +85,15 @@ export function Navbar() {
             <div className="hidden h-10 w-32 animate-pulse rounded-full bg-white/5 md:block" />
           ) : session?.user ? (
             <div className="hidden items-center gap-3 md:flex">
+              {/* Dashboard Action Button */}
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-1.5 rounded-full border border-brand/40 bg-brand/15 px-3.5 py-1.5 text-xs font-semibold text-white transition-all hover:border-brand/70 hover:bg-brand/25 shadow-[0_0_12px_rgba(92,83,254,0.2)]"
+              >
+                <LayoutDashboard className="h-3.5 w-3.5 text-brand-light" />
+                <span>Dashboard</span>
+              </Link>
+
               {/* Profile Avatar Pill matching Figma */}
               <div className="flex items-center gap-2.5 rounded-full border border-white/10 bg-[#141419] py-1 pr-3 pl-1.5 shadow-sm">
                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand/30 text-xs font-bold text-white ring-1 ring-brand/50">
@@ -115,6 +125,14 @@ export function Navbar() {
             </div>
           ) : (
             <div className="hidden items-center gap-4 md:flex">
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-xs font-medium text-white/80 transition-colors hover:border-white/25 hover:text-white"
+              >
+                <LayoutDashboard className="h-3.5 w-3.5 text-brand-light" />
+                <span>Dashboard</span>
+              </Link>
+
               <Link
                 href="/sign-in"
                 className="text-sm font-medium text-brand-light transition-colors hover:text-brand-light/80"
@@ -175,16 +193,24 @@ export function Navbar() {
                   </div>
                 )}
 
-                {navLinks.map((link) => (
-                  <SheetClose
-                    key={link.href}
-                    render={<Link href={link.href} />}
-                    nativeButton={false}
-                    className="rounded-lg px-3 py-2.5 text-base text-foreground/90 transition-colors hover:bg-muted hover:text-foreground"
-                  >
-                    {link.label}
-                  </SheetClose>
-                ))}
+                {navLinks.map((link) => {
+                  const isDashboard = link.href === "/dashboard"
+                  return (
+                    <SheetClose
+                      key={link.href}
+                      render={<Link href={link.href} />}
+                      nativeButton={false}
+                      className={
+                        isDashboard
+                          ? "flex items-center gap-2 rounded-lg bg-brand/15 border border-brand/30 px-3 py-2.5 text-base font-semibold text-white transition-colors hover:bg-brand/25"
+                          : "rounded-lg px-3 py-2.5 text-base text-foreground/90 transition-colors hover:bg-muted hover:text-foreground"
+                      }
+                    >
+                      {isDashboard && <LayoutDashboard className="h-4 w-4 text-brand-light" />}
+                      <span>{link.label}</span>
+                    </SheetClose>
+                  )
+                })}
                 <span aria-hidden className="my-2 h-px bg-border" />
                 {!isPending && session?.user ? (
                   <SheetClose

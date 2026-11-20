@@ -3,9 +3,11 @@
 import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { useRouter, usePathname } from "next/navigation"
 import { Menu, X } from "lucide-react"
 
 import logo from "@/app/images/logo.png"
+import { useSession } from "@/lib/auth-client"
 import { DashboardProvider } from "@/lib/dashboard-context"
 import { DashboardSidebar } from "@/components/DashboardSidebar"
 
@@ -14,7 +16,28 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const { data: session, isPending } = useSession()
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
+
+  // Client-side authentication check
+  React.useEffect(() => {
+    if (!isPending && !session?.user) {
+      router.replace(`/sign-in?callbackUrl=${encodeURIComponent(pathname || "/dashboard")}`)
+    }
+  }, [isPending, session, router, pathname])
+
+  if (isPending) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#020205]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-brand border-t-transparent" />
+          <span className="text-xs font-mono text-white/50 tracking-wider">Verifying session...</span>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <DashboardProvider>
