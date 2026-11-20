@@ -156,6 +156,25 @@ Designed to match the dark atmospheric space theme and Figma design tokens:
 - Semantic footer with HireLoop branding and live pulsing system status ("All Systems Operational").
 - Role-specific navigation columns for Job Seekers, Employers, and Company/Legal.
 
+### 3.9 Browse Jobs (`app/jobs/page.tsx`)
+- Multifaceted search & filtering: Keyword debounce, location input, employment type pills, category filters, minimum salary tier selectors, and remote-only toggle.
+- Dynamic result counts, mobile drawer filters, interactive job cards with salary ranges in Space Mono, tags, save states, and "View Details & Apply" triggers.
+- Wrapped in `<React.Suspense>` for client-side search parameter handling during static page generation.
+
+### 3.10 Job Details & Application Modal (`app/jobs/[jobId]/page.tsx`)
+- Full role specifications: Overview, key responsibilities, requirements, and benefits & perks with verified icons.
+- Company info card featuring company avatar, team size, headquarters, foundation year, and direct website link.
+- Interactive Apply Modal: Candidate session confirmation, resume selector, optional cover letter field, monthly application quota alert, and application submission status.
+- Similar job suggestions carousel/grid.
+
+### 3.11 Companies Directory & Profile Pages (`app/companies/page.tsx`, `app/companies/[companyId]/page.tsx`, and `/company` aliases)
+- Directory with search and industry category tabs (AI, Developer Tools, E-Commerce, Media, Fintech, Autonomous Tech, Productivity).
+- Company profile displaying complete background, mission, technology domain tags, and list of all active open roles with direct application links.
+
+### 3.12 Pricing Page (`app/pricing/page.tsx`)
+- Dual-role segmented toggle: "For Job Seekers" (Free $0, Pro $19/mo, Premium $39/mo) and "For Recruiters" (Free $0, Growth $49/mo, Enterprise $149/mo).
+- Highlighting features, plan limits, active job post allocations, 14-day money-back guarantee banner, and expandable FAQ accordion.
+
 ---
 
 ## 4. Coding Guidelines & Best Practices
