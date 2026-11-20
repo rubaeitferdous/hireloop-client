@@ -22,6 +22,7 @@ export interface Job {
   companyLogo: string
   category: string
   jobType: "Full-time" | "Part-time" | "Remote" | "Contract" | "Internship"
+  status?: "Active" | "Closed" | "Draft"
   location: string
   isRemote: boolean
   salaryMin: number
