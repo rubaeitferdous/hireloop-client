@@ -38,7 +38,7 @@ const seekerPlans: PlanTier[] = [
     description: "Essential toolkit for casual job seekers exploring new career horizons.",
     features: [
       "Browse & save up to 10 jobs",
-      "Apply to up to 3 jobs per month",
+      "Apply to up to 10 jobs (Free tier)",
       "Basic candidate profile",
       "Instant email job alerts",
       "Community support",
@@ -61,7 +61,7 @@ const seekerPlans: PlanTier[] = [
       "Priority standard support",
     ],
     ctaText: "Upgrade to Pro",
-    ctaHref: "/sign-up?role=seeker&plan=pro",
+    ctaHref: "/checkout?plan=pro",
   },
   {
     name: "Premium",
@@ -77,7 +77,7 @@ const seekerPlans: PlanTier[] = [
       "Dedicated 24/7 priority support",
     ],
     ctaText: "Join Premium",
-    ctaHref: "/sign-up?role=seeker&plan=premium",
+    ctaHref: "/checkout?plan=premium",
   },
 ]
 
@@ -156,7 +156,7 @@ const faqs = [
   {
     question: "What happens when a job seeker exhausts their monthly application limit?",
     answer:
-      "On the Free tier (3 applications/month), you can browse and bookmark unlimited jobs, and your application quota resets automatically on the first day of each calendar month. Upgrading to Pro (30/month) or Premium (unlimited) instantly lifts this ceiling.",
+      "On the Free tier (up to 10 applications), you can browse and bookmark unlimited jobs, and your application quota resets automatically on the first day of each calendar month. Upgrading to Pro (30/month) or Premium (unlimited) instantly lifts this ceiling so you can continue applying without interruption.",
   },
 ]
 

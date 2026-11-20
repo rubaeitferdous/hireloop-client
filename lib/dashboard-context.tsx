@@ -4,6 +4,7 @@ import * as React from "react"
 import { useSession } from "@/lib/auth-client"
 import { mockJobs, mockCompanies, Job, Company } from "@/lib/mock-data"
 import { api } from "@/lib/api"
+import { PaymentModal } from "@/components/PaymentModal"
 
 export type ApplicationStatus = "Applied" | "Under Review" | "Shortlisted" | "Rejected" | "Offered"
 export type CompanyApprovalStatus = "Pending" | "Approved" | "Rejected"
@@ -59,6 +60,9 @@ interface DashboardContextType {
     applicationsLimit: number
   }
   upgradeSeekerPlan: (plan: "Free" | "Pro" | "Premium") => void
+  isPaymentModalOpen: boolean
+  openPaymentModal: (plan?: "Pro" | "Premium", reason?: string) => void
+  closePaymentModal: () => void
   seekerProfile: {
     headline: string
     bio: string
@@ -263,11 +267,26 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     "spotify-principal-fullstack",
   ])
   const [seekerPlan, setSeekerPlan] = React.useState({
-    name: "Pro" as "Free" | "Pro" | "Premium",
-    price: 19,
-    applicationsUsed: 3,
-    applicationsLimit: 30,
+    name: "Free" as "Free" | "Pro" | "Premium",
+    price: 0,
+    applicationsUsed: 2,
+    applicationsLimit: 10,
   })
+
+  // Payment Modal State
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = React.useState(false)
+  const [paymentModalPlan, setPaymentModalPlan] = React.useState<"Pro" | "Premium">("Pro")
+  const [paymentModalReason, setPaymentModalReason] = React.useState("")
+
+  const openPaymentModal = (plan: "Pro" | "Premium" = "Pro", reason?: string) => {
+    setPaymentModalPlan(plan)
+    if (reason) setPaymentModalReason(reason)
+    setIsPaymentModalOpen(true)
+  }
+
+  const closePaymentModal = () => {
+    setIsPaymentModalOpen(false)
+  }
   const [seekerProfile, setSeekerProfile] = React.useState({
     headline: "Senior Distributed Systems & AI Engineer",
     bio: "Passionate about high-throughput inference runtimes, distributed consensus, and empowering developer ecosystems.",
@@ -369,9 +388,12 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     const targetJob = mockJobs.find((j) => j.id === jobId)
     if (!targetJob) return false
 
-    // Plan quota validation
+    // Plan quota validation (Max 10 applications on Free plan)
     if (seekerPlan.applicationsLimit !== Infinity && seekerPlan.applicationsUsed >= seekerPlan.applicationsLimit) {
-      alert(`You have reached your monthly limit of ${seekerPlan.applicationsLimit} applications. Please upgrade to apply!`)
+      openPaymentModal(
+        "Pro",
+        `You have reached your limit of ${seekerPlan.applicationsLimit} applications on the Free tier. Upgrade to Pro or Premium to apply for more jobs!`
+      )
       return false
     }
 
@@ -410,7 +432,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
 
   const upgradeSeekerPlan = (plan: "Free" | "Pro" | "Premium") => {
     const priceMap = { Free: 0, Pro: 19, Premium: 39 }
-    const limitMap = { Free: 3, Pro: 30, Premium: Infinity }
+    const limitMap = { Free: 10, Pro: 30, Premium: Infinity }
 
     setSeekerPlan({
       name: plan,
@@ -623,6 +645,9 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         submitApplication,
         seekerPlan,
         upgradeSeekerPlan,
+        isPaymentModalOpen,
+        openPaymentModal,
+        closePaymentModal,
         seekerProfile,
         updateSeekerProfile,
         myCompany,
@@ -645,6 +670,12 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       }}
     >
       {children}
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={closePaymentModal}
+        initialPlan={paymentModalPlan}
+        reason={paymentModalReason || undefined}
+      />
     </DashboardContext.Provider>
   )
 }

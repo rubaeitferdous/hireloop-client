@@ -20,7 +20,7 @@ import { useDashboard } from "@/lib/dashboard-context"
 import { mockJobs, Job } from "@/lib/mock-data"
 
 export default function SeekerJobsPage() {
-  const { savedJobIds, toggleSaveJob, submitApplication, seekerPlan, seekerProfile } = useDashboard()
+  const { savedJobIds, toggleSaveJob, submitApplication, seekerPlan, seekerProfile, openPaymentModal } = useDashboard()
 
   const [query, setQuery] = React.useState("")
   const [selectedCategory, setSelectedCategory] = React.useState("All")
@@ -190,6 +190,13 @@ export default function SeekerJobsPage() {
                   <button
                     type="button"
                     onClick={() => {
+                      if (seekerPlan.applicationsLimit !== Infinity && seekerPlan.applicationsUsed >= seekerPlan.applicationsLimit) {
+                        openPaymentModal(
+                          "Pro",
+                          `You have reached your limit of ${seekerPlan.applicationsLimit} applications on the Free tier. Upgrade to continue applying!`
+                        )
+                        return
+                      }
                       setApplyModalJob(job)
                       setSubmitSuccess(false)
                     }}

@@ -7,17 +7,20 @@ import { CheckCircle2, CreditCard, Sparkles, Zap, ArrowRight, ShieldCheck, Loade
 import { useDashboard } from "@/lib/dashboard-context"
 
 export default function SeekerBillingPage() {
-  const { seekerPlan, upgradeSeekerPlan, payments } = useDashboard()
+  const { seekerPlan, upgradeSeekerPlan, payments, openPaymentModal } = useDashboard()
   const [upgradingPlan, setUpgradingPlan] = React.useState<string | null>(null)
   const [successToast, setSuccessToast] = React.useState<string | null>(null)
 
-  const handleUpgrade = async (planName: "Free" | "Pro" | "Premium") => {
+  const handleUpgrade = (planName: "Pro" | "Premium") => {
+    openPaymentModal(planName)
+  }
+
+  const handleDowngrade = async (planName: "Free") => {
     setUpgradingPlan(planName)
-    // Simulate Stripe checkout redirect / webhook execution
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 800))
     upgradeSeekerPlan(planName)
     setUpgradingPlan(null)
-    setSuccessToast(`Successfully upgraded to ${planName} Plan! Your application quota is refreshed.`)
+    setSuccessToast(`Plan changed to Free. Your quota has reset to 10 applications.`)
     setTimeout(() => setSuccessToast(null), 4000)
   }
 
@@ -94,7 +97,7 @@ export default function SeekerBillingPage() {
               <p className="mt-1 text-xs text-white/60">Essential browsing & limited monthly applications.</p>
               <div className="mt-4 font-space-mono text-2xl font-bold text-white">$0 <span className="text-xs text-white/40">forever</span></div>
               <ul className="mt-4 space-y-2 text-xs text-white/70">
-                <li>• 3 applications per month</li>
+                <li>• Up to 10 applications (Free tier)</li>
                 <li>• Up to 10 saved jobs</li>
                 <li>• Standard email notifications</li>
               </ul>
@@ -102,7 +105,7 @@ export default function SeekerBillingPage() {
             {seekerPlan.name !== "Free" && (
               <button
                 type="button"
-                onClick={() => handleUpgrade("Free")}
+                onClick={() => handleDowngrade("Free")}
                 disabled={upgradingPlan !== null}
                 className="mt-6 w-full rounded-xl border border-white/15 py-2 text-xs font-semibold text-white/80 hover:bg-white/[0.04]"
               >

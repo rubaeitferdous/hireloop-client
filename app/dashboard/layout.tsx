@@ -40,9 +40,8 @@ export default function DashboardLayout({
   }
 
   return (
-    <DashboardProvider>
-      <div className="flex min-h-screen bg-[#020205] text-foreground">
-        {/* Desktop Sidebar (Fixed Left) */}
+    <div className="flex min-h-screen bg-[#020205] text-foreground">
+      {/* Desktop Sidebar (Fixed Left) */}
         <aside className="hidden w-64 shrink-0 lg:block border-r border-white/10">
           <div className="sticky top-0 h-screen overflow-y-auto">
             <DashboardSidebar />
@@ -93,6 +92,5 @@ export default function DashboardLayout({
           </main>
         </div>
       </div>
-    </DashboardProvider>
   )
 }

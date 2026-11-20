@@ -31,6 +31,7 @@ import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { mockJobs, mockCompanies, Job } from "@/lib/mock-data"
 import { useSession } from "@/lib/auth-client"
+import { useDashboard } from "@/lib/dashboard-context"
 
 export default function JobDetailsPage() {
   const params = useParams()
@@ -38,6 +39,7 @@ export default function JobDetailsPage() {
   const jobId = params?.jobId as string
 
   const { data: session } = useSession()
+  const { seekerPlan, submitApplication, openPaymentModal, applications } = useDashboard()
   const [isSaved, setIsSaved] = React.useState(false)
   const [isApplyModalOpen, setIsApplyModalOpen] = React.useState(false)
   const [coverLetter, setCoverLetter] = React.useState("")
@@ -49,6 +51,9 @@ export default function JobDetailsPage() {
   // Find job data
   const job = mockJobs.find((j) => j.id === jobId) || mockJobs[0]
   const company = mockCompanies.find((c) => c.id === job.companyId) || mockCompanies[0]
+
+  // Check if already applied
+  const isAlreadyApplied = applications.some((app) => app.jobId === job.id) || applicationSubmitted
 
   // Similar jobs (same category or company, excluding current)
   const similarJobs = mockJobs
@@ -68,6 +73,16 @@ export default function JobDetailsPage() {
       router.push(`/sign-in?redirect=/jobs/${job.id}`)
       return
     }
+
+    // 10-job quota limit check on Free tier
+    if (seekerPlan.applicationsLimit !== Infinity && seekerPlan.applicationsUsed >= seekerPlan.applicationsLimit) {
+      openPaymentModal(
+        "Pro",
+        `You have used all ${seekerPlan.applicationsLimit} applications included in the Free tier. Upgrade to Pro ($19/mo) or Premium ($39/mo) to submit more applications!`
+      )
+      return
+    }
+
     setIsApplyModalOpen(true)
   }
 
@@ -75,11 +90,14 @@ export default function JobDetailsPage() {
     e.preventDefault()
     setIsSubmittingApplication(true)
 
-    // Simulate API application submission
-    await new Promise((resolve) => setTimeout(resolve, 1200))
-
+    const success = await submitApplication(job.id, coverLetter, selectedResume)
     setIsSubmittingApplication(false)
-    setApplicationSubmitted(true)
+
+    if (success) {
+      setApplicationSubmitted(true)
+    } else {
+      setIsApplyModalOpen(false)
+    }
   }
 
   return (
@@ -195,11 +213,25 @@ export default function JobDetailsPage() {
 
                 <button
                   type="button"
-                  onClick={handleApplyClick}
-                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-8 text-sm font-semibold text-white shadow-[0_0_24px_rgba(92,83,254,0.4)] transition-all hover:bg-brand/90 hover:shadow-[0_0_32px_rgba(92,83,254,0.6)] active:scale-[0.98] sm:w-auto"
+                  onClick={isAlreadyApplied ? undefined : handleApplyClick}
+                  disabled={isAlreadyApplied}
+                  className={`inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl px-8 text-sm font-semibold transition-all sm:w-auto ${
+                    isAlreadyApplied
+                      ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 cursor-default"
+                      : "bg-brand text-white shadow-[0_0_24px_rgba(92,83,254,0.4)] hover:bg-brand/90 hover:shadow-[0_0_32px_rgba(92,83,254,0.6)] active:scale-[0.98]"
+                  }`}
                 >
-                  <Sparkles className="h-4 w-4" />
-                  <span>Apply For This Role</span>
+                  {isAlreadyApplied ? (
+                    <>
+                      <CheckCircle2 className="h-4 w-4" />
+                      <span>Application Submitted</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4" />
+                      <span>Apply For This Role</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -263,15 +295,20 @@ export default function JobDetailsPage() {
                 <div>
                   <h3 className="font-manrope text-xl font-bold text-white">Interested in joining {job.companyName}?</h3>
                   <p className="mt-1 text-xs text-white/60">
-                    Application deadline: {job.deadline}. Free plan includes 3 monthly applications.
+                    Application deadline: {job.deadline}. Free tier includes up to 10 applications.
                   </p>
                 </div>
                 <button
                   type="button"
-                  onClick={handleApplyClick}
-                  className="rounded-xl bg-brand px-7 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:bg-brand/90 hover:shadow-[0_0_24px_rgba(92,83,254,0.5)]"
+                  onClick={isAlreadyApplied ? undefined : handleApplyClick}
+                  disabled={isAlreadyApplied}
+                  className={`rounded-xl px-7 py-3 text-sm font-semibold transition-all ${
+                    isAlreadyApplied
+                      ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 cursor-default"
+                      : "bg-brand text-white shadow-lg hover:bg-brand/90 hover:shadow-[0_0_24px_rgba(92,83,254,0.5)]"
+                  }`}
                 >
-                  Apply Now
+                  {isAlreadyApplied ? "Application Submitted" : "Apply Now"}
                 </button>
               </div>
             </div>
