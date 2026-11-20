@@ -130,6 +130,32 @@ Designed to match the dark atmospheric space theme and Figma design tokens:
   - Connected `app/(auth)/sign-in/page.tsx` directly to `authClient.signIn.email`, including credential authentication against MongoDB, rememberMe persistence, error alerts, loading state spinner, and redirect to home.
   - Both auth pages check active session via `useSession()` and automatically redirect authenticated users to the home page (`/`).
 
+### 3.4 Brand Marquee (`components/brand-marquee.tsx`)
+- Continuous animated marquee showcasing verified logos (`public/logos/`) for 12 global leaders (Google, Meta, Apple, Amazon, Netflix, Nvidia, Microsoft, Uber, Airbnb, Spotify, Adobe, Tesla).
+- Smooth infinite CSS scroll (`@keyframes marquee`) with hover-pause, edge gradient fade masks (`[mask-image:linear-gradient(...)]`), and grayscale-to-color brightness transitions.
+
+### 3.5 Featured Jobs (`components/featured-jobs.tsx`)
+- Hand-picked opportunities grid matching dark space tokens with category filter chips (All, Engineering, Design, Product, AI).
+- Job cards featuring company logos, location tags, salary ranges in Space Mono, interactive bookmark save states, and "Apply" triggers.
+- Direct link to full job exploration (`/jobs`).
+
+### 3.6 Platform Features (`components/features-section.tsx`)
+- Animated via Framer Motion following `hireloop-resources/Framer-Motion-guide.md` (`fadeInUp`, `staggerContainer`, `whileInView`, `whileHover={{ y: -4 }}`).
+- Showcases the 4 core platform capabilities:
+  1. Smart Search & Filters
+  2. Salary & Compensation Insights
+  3. Top Verified Companies
+  4. Saved Jobs & Pipeline Tracker
+
+### 3.7 Call to Action (`components/cta-section.tsx`)
+- High-impact curved wireframe background using `app/images/cta-bg.png` and radial purple/magenta ambient glow.
+- Dual action triggers: "Browse All Jobs" (`/jobs`) and "Post a Job Free" (`/sign-up?role=recruiter`).
+- Trust badges verifying free tier inclusion, recruiter vetting, and instant job alerts.
+
+### 3.8 Footer (`components/footer.tsx`)
+- Semantic footer with HireLoop branding and live pulsing system status ("All Systems Operational").
+- Role-specific navigation columns for Job Seekers, Employers, and Company/Legal.
+
 ---
 
 ## 4. Coding Guidelines & Best Practices
