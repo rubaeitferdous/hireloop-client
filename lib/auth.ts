@@ -21,6 +21,11 @@ if (process.env.NODE_ENV === "production") {
 
 const db = client.db("hireloopdb")
 
+const googleClientId =
+  process.env.GOOGLE_CLIENT_ID || process.env.GOOGLE_OAUTH_CLIENT_ID
+const googleClientSecret =
+  process.env.GOOGLE_CLIENT_SECRET || process.env.GOOGLE_OAUTH_CLIENT_SECRET
+
 export const auth = betterAuth({
   database: mongodbAdapter(db, {
     client,
@@ -39,12 +44,12 @@ export const auth = betterAuth({
       },
     },
   },
-  ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+  ...(googleClientId && googleClientSecret
     ? {
         socialProviders: {
           google: {
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            clientId: googleClientId,
+            clientSecret: googleClientSecret,
           },
         },
       }
